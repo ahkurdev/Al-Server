@@ -1,0 +1,77 @@
+{
+  "name": "al-server",
+  "productName": "Al Server",
+  "version": "0.1.0",
+  "description": "All-in-one local development server manager - bebas pilih database, atur port lewat UI, gratis tanpa iklan.",
+  "author": "Al",
+  "license": "MIT",
+  "allowScripts": {
+    "electron@31.7.7": true,
+    "esbuild@0.21.5": true
+  },
+  "main": "dist/main/index.js",
+  "scripts": {
+    "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "dev": "concurrently -k \"vite\" \"tsc -p tsconfig.main.json && cross-env AL_SERVER_DEV=1 electron dist/main/index.js\"",
+    "dev:renderer": "vite",
+    "build:renderer": "vite build",
+    "build:main": "tsc -p tsconfig.main.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "npm run build:renderer && npm run build:main",
+    "dist": "npm run build && electron-builder --win nsis",
+    "test": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "electron-log": "^5.1.2",
+    "electron-store": "^10.0.1",
+    "electron-updater": "^6.3.9",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tree-kill": "^1.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^9.0.1",
+    "cross-env": "^7.0.3",
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.5.0",
+    "vite": "^5.4.0"
+  },
+  "build": {
+    "appId": "dev.al.server",
+    "productName": "Al Server",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "index.html",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/binaries",
+        "to": "binaries",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "resources/icons/icon.ico"
+    },
+    "nsis": {
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Al Server"
+    }
+  }
+}

@@ -1,0 +1,1 @@
+NSIS banner/header images go here.

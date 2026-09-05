@@ -1,0 +1,1 @@
+Place final icon.ico here (placeholder for now). TODO: final branding + code signing.
