@@ -22,7 +22,23 @@ resources/binaries  binary bawaan (di-bundle via extraResources ke process.resou
 - Log: userData/logs/<service>/
 - Data service (data dir DB, htdocs): userData/data/<service>/
 
-## Asumsi dan perlu direview
+## Binary yang di-bundle (terverifikasi jalan)
+
+- Apache 2.4.68 (Apache Lounge VS18 Win64) — start + HTTP 200 verified
+- Nginx 1.30.4 stable — start + HTTP verified
+- PHP 8.5.10 (default aktif) + PHP 8.4.25 (VS17 x64 Thread Safe) — php-cgi + FastCGI verified
+- MySQL Community 8.4.8 LTS (noinstall) — init + start + koneksi verified
+- MariaDB 11.4.8 — init + start + koneksi verified
+- PostgreSQL 18.6 — initdb + start + koneksi verified
+- Logo `resources/icons/icon.ico` dibuat internal (server-stack mark, navy/teal).
+
+Catatan lingkungan:
+
+- PostgreSQL menolak jalan sebagai Administrator (aturan keamanan upstream). Di dev box yang elevated, verifikasi PG dilakukan via unprivileged token. User normal tidak elevated tidak kena masalah ini.
+- Port 20128 RESERVED — Al Server menolak memakai atau mematikan port ini (lihat RESERVED_PORTS di PortAllocator).
+- MySQL default 3306 bentrok jika mesin sudah ada service MariaDB/MySQL sistem; ganti port dari UI (terverifikasi di 3336).
+
+## Asumsi dan perlu direview (lama)
 
 - Binary database: versi stable terbaru saat packaging (MySQL Community 8.4 LTS, MariaDB 11.4 LTS, PostgreSQL 17.x, Apache 2.4.x, Nginx stable 1.26.x, PHP 8.3.x). Taruh binary per service di resources/binaries/<service>/ dan catat versi persis di sini sebelum rilis.
 - Code signing: SKIP (installer unsigned). TODO sebelum rilis publik.

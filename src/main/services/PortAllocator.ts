@@ -5,6 +5,12 @@ export function isValidPort(port: number): boolean {
   return Number.isInteger(port) && port >= 1 && port <= 65535;
 }
 
+export const RESERVED_PORTS: number[] = [20128];
+
+export function isReservedPort(port: number): boolean {
+  return RESERVED_PORTS.includes(port);
+}
+
 export function findConflict(services: ServiceConfig[], name: string, port: number): string | null {
   const clash = services.find((s) => s.name !== name && s.port === port);
   return clash ? `Port ${port} already used by ${clash.label}` : null;

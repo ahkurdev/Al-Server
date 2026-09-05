@@ -1,0 +1,11 @@
+[mysqld]
+port=__PORT__
+bind-address=127.0.0.1
+basedir=__BASE_DIR__
+datadir=__DATA_DIR__
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+default-storage-engine=InnoDB
+sql_mode=STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION
+max_connections=50
+table_definition_cache=400

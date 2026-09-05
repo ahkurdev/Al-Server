@@ -13,8 +13,13 @@ export class PhpVersionManager {
       dirs = [];
     }
     const active = (this.store.get("activePhp", "") as string) || "";
-    const versions: PhpVersion[] = dirs.map((v) => ({ version: v, path: path.join(this.phpRoot, v), active: v === active }));
-    if (versions.length > 0 && !versions.some((v) => v.active)) versions[0].active = true;
+    const versions: PhpVersion[] = dirs
+      .sort((a, b) => (a < b ? 1 : a > b ? -1 : 0))
+      .map((v) => ({ version: v, path: path.join(this.phpRoot, v), active: v === active }));
+    if (versions.length > 0 && !versions.some((v) => v.active)) {
+      versions[0].active = true;
+      this.store.set("activePhp", versions[0].version);
+    }
     return versions;
   }
 
