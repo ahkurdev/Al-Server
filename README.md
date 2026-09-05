@@ -22,6 +22,13 @@ resources/binaries  binary bawaan (di-bundle via extraResources ke process.resou
 - Log: userData/logs/<service>/
 - Data service (data dir DB, htdocs): userData/data/<service>/
 
+## Installer Windows (terverifikasi)
+
+- `npm run dist` menghasilkan `release/Al Server Setup 0.1.0.exe` (~303MB, assisted NSIS: pilih direktori, shortcut desktop + start menu, uninstaller).
+- Terverifikasi: install silent (`/S /D=C:\path` — pakai backslash), semua binary ikut, app boot dan nulis `%APPDATA%/Al Server/config.json`, uninstall bersih.
+- Installer UNSIGNED — Windows SmartScreen akan tampilkan warning biru "Unknown publisher". Klik More info > Run anyway. TODO: code signing sebelum rilis publik.
+- release/ di-gitignore; distribusi resmi via GitHub Releases (auto-update electron-updater membaca latest.yml).
+
 ## Binary yang di-bundle (terverifikasi jalan)
 
 - Apache 2.4.68 (Apache Lounge VS18 Win64) — start + HTTP 200 verified
