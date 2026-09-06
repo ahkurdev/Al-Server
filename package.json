@@ -1,7 +1,7 @@
 {
   "name": "al-server",
   "productName": "Al Server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "All-in-one local development server manager - bebas pilih database, atur port lewat UI, gratis tanpa iklan.",
   "author": "Al",
   "license": "MIT",
