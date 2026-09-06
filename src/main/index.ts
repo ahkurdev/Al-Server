@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, dialog } from "electron";
 import * as net from "net";
 import * as path from "path";
 import log from "electron-log";
@@ -10,6 +10,7 @@ import { registerHandlers } from "./ipc/handlers";
 
 let win: BrowserWindow | null = null;
 let manager: ServiceManager | null = null;
+let updaterSvc: UpdaterService | null = null;
 
 function waitForPort(port: number, host: string, timeoutMs = 30000): Promise<void> {
   const started = Date.now();
@@ -47,6 +48,7 @@ async function createWindow(): Promise<void> {
   const php = new PhpVersionManager(store, phpRoot);
   const vhosts = new VhostManager(store, userData);
   const updater = new UpdaterService();
+  updaterSvc = updater;
   registerHandlers({ services: manager, php, vhosts, updater, store });
 
   win = new BrowserWindow({
@@ -71,7 +73,23 @@ async function createWindow(): Promise<void> {
   win.on("closed", () => { win = null; });
 }
 
-app.whenReady().then(createWindow).catch((err) => {
+app.whenReady().then(createWindow).then(async () => {
+  if (process.env.AL_SERVER_DEV === "1") return;
+  try {
+    const probe = await updaterSvc?.probe();
+    if (probe?.available && win) {
+      const res = await dialog.showMessageBox(win, {
+        type: "info",
+        title: "Update tersedia",
+        message: `Al Server v${probe.version} tersedia. Download dan install sekarang?`,
+        buttons: ["Download", "Nanti"]
+      });
+      if (res.response === 0) await updaterSvc?.downloadAndInstall();
+    }
+  } catch (err) {
+    log.warn("update probe failed:", err);
+  }
+}).catch((err) => {
   log.error("failed to start:", err);
   app.quit();
 });

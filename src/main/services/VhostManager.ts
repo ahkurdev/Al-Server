@@ -7,11 +7,48 @@ interface StoreLike {
   set(key: string, value: unknown): void;
 }
 
+function esc(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export class VhostManager {
   constructor(private store: StoreLike, private userData: string) {}
 
   list(): VhostEntry[] {
     return (this.store.get("vhosts", []) as VhostEntry[]) || [];
+  }
+
+  private hostsPath(): string {
+    if (process.platform === "win32") return "C:\\Windows\\System32\\drivers\\etc\\hosts";
+    return "/etc/hosts";
+  }
+
+  syncHostsEntry(host: string, present: boolean): ActionResult {
+    const file = this.hostsPath();
+    let text: string;
+    try {
+      text = fs.readFileSync(file, "utf8");
+    } catch (err) {
+      return { success: false, message: `cannot read hosts file: ${err instanceof Error ? err.message : String(err)}` };
+    }
+    const line = `127.0.0.1 ${host} # al-server`;
+    const has = text.split("\n").some((l) => l.trim() === line || new RegExp(`^127\\.0\\.0\\.1\\s+${esc(host)}(\\s|$)`).test(l.trim()));
+    if (present && has) return { success: true, message: "hosts entry already present" };
+    if (!present && !has) return { success: true, message: "hosts entry already absent" };
+    let next: string;
+    if (present) {
+      next = text.trimEnd() + "\n" + line + "\n";
+    } else {
+      next = text.split("\n").filter((l) => !new RegExp(`^127\\.0\\.0\\.1\\s+${esc(host)}(\\s|$)`).test(l.trim()) && l.trim() !== line).join("\n") + "\n";
+    }
+    try {
+      fs.writeFileSync(file, next, "utf8");
+      return { success: true, message: present ? `hosts entry added for ${host}` : `hosts entry removed for ${host}` };
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException)?.code ?? "";
+      const msg = err instanceof Error ? err.message : String(err);
+      return { success: false, message: `hosts write failed (run Al Server as admin once): ${code} ${msg}`.trim() };
+    }
   }
 
   add(entry: VhostEntry): ActionResult {
@@ -21,13 +58,20 @@ export class VhostManager {
     list.push(entry);
     this.store.set("vhosts", list);
     const write = this.renderVhostFile(entry.server, list.filter((v) => v.server === entry.server));
-    return { success: true, message: `vhost ${entry.host} added. Config: ${write}` };
+    const hosts = this.syncHostsEntry(entry.host, true);
+    const extra = hosts.success ? hosts.message : `WARNING: ${hosts.message}`;
+    return { success: true, message: `vhost ${entry.host} added. Config: ${write}. ${extra}` };
   }
 
   remove(host: string): ActionResult {
     const list = this.list().filter((v) => v.host !== host);
     this.store.set("vhosts", list);
-    return { success: true, message: `${host} removed` };
+    for (const server of ["apache", "nginx"] as const) {
+      this.renderVhostFile(server, list.filter((v) => v.server === server));
+    }
+    const hosts = this.syncHostsEntry(host, false);
+    const extra = hosts.success ? hosts.message : `WARNING: ${hosts.message}`;
+    return { success: true, message: `${host} removed. ${extra}` };
   }
 
   renderVhostFile(server: "apache" | "nginx", entries: VhostEntry[]): string {

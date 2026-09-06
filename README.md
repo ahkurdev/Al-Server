@@ -47,8 +47,8 @@ Catatan lingkungan:
 
 ## Asumsi dan perlu direview (lama)
 
-- Binary database: versi stable terbaru saat packaging (MySQL Community 8.4 LTS, MariaDB 11.4 LTS, PostgreSQL 17.x, Apache 2.4.x, Nginx stable 1.26.x, PHP 8.3.x). Taruh binary per service di resources/binaries/<service>/ dan catat versi persis di sini sebelum rilis.
 - Code signing: SKIP (installer unsigned). TODO sebelum rilis publik.
+- Final branding: logo internal sudah terpasang (icon.ico); ganti kapan saja via resources/icons/icon.ico lalu npm run dist ulang.
 - Nama aplikasi final: "Al Server" (App ID dev.al.server).
 - Tanpa binary asli, ServiceManager jalan mode mock (placeholder process) supaya dashboard tetap testable. Begitu binary asli ada, mock otomatis nonaktif.
 - Virtual host edit file hosts butuh elevated permission di Windows; app deteksi EACCES dan tampilkan instruksi run-as-admin.
