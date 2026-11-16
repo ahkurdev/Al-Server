@@ -1,61 +1,63 @@
 # Al Server
 
-All-in-one local development server manager. Alternatif modern XAMPP/Laragon: database bundled (MySQL, MariaDB, PostgreSQL), atur port lewat UI, gratis tanpa iklan.
+Bahasa Indonesia version: [readme.id.md](readme.id.md)
+
+All-in-one local development server manager. A modern alternative to XAMPP/Laragon: bundled databases (MySQL, MariaDB, PostgreSQL), configure ports through the UI, free with no ads.
 
 ## Quick start
 
 npm install
-npm run dev        # renderer (vite :5173) + electron
-npm run build      # dist/renderer + dist/main
-npm run dist       # installer NSIS (Windows)
+npm run dev     # renderer (vite :5173) + electron
+npm run build   # dist/renderer + dist/main
+npm run dist    # NSIS installer (Windows)
 
-## Struktur
+## Structure
 
 src/main      Electron main process (ServiceManager, BinaryRegistry, ConfigEditor, PortAllocator, UpdaterService, VhostManager, PhpVersionManager, ConfigBackup)
 src/renderer  React 18 + TS UI (Dashboard, ServiceCard, PortEditor, DatabasePicker, LogViewer)
-src/shared    tipe bersama main + renderer
-resources/binaries  binary bawaan (di-bundle via extraResources ke process.resourcesPath/binaries)
+src/shared    types shared by main + renderer
+resources/binaries  bundled binaries (bundled via extraResources into process.resourcesPath/binaries)
 
-## Path runtime
+## Runtime paths
 
 - Config internal: app.getPath('userData') via electron-store
 - Log: userData/logs/<service>/
-- Data service (data dir DB, htdocs): userData/data/<service>/
+- Service data (DB data dir, htdocs): userData/data/<service>/
 
-## Installer Windows (terverifikasi)
+## Windows installer (verified)
 
-- `npm run dist` menghasilkan `release/Al Server Setup 0.1.0.exe` (~303MB, assisted NSIS: pilih direktori, shortcut desktop + start menu, uninstaller).
-- Terverifikasi: install silent (`/S /D=C:\path` — pakai backslash), semua binary ikut, app boot dan nulis `%APPDATA%/Al Server/config.json`, uninstall bersih.
-- Installer UNSIGNED — Windows SmartScreen akan tampilkan warning biru "Unknown publisher". Klik More info > Run anyway. TODO: code signing sebelum rilis publik.
-- release/ di-gitignore; distribusi resmi via GitHub Releases (auto-update electron-updater membaca latest.yml).
+- `npm run dist` produces `release/Al Server Setup 0.1.0.exe` (~303MB, assisted NSIS: choose directory, desktop + start menu shortcuts, uninstaller).
+- Verified: silent install (`/S /D=C:\path` — use backslashes), all binaries included, app boots and writes `%APPDATA%\Al Server\config.json`, clean uninstall.
+- Installer is UNSIGNED — Windows SmartScreen will show a blue "Unknown publisher" warning. Click More info > Run anyway. TODO: code signing before the public release.
+- release/ is gitignored; official distribution via GitHub Releases (auto-update via electron-updater reading latest.yml).
 
-## Binary yang di-bundle (terverifikasi jalan)
+## Bundled binaries (verified working)
 
 - Apache 2.4.68 (Apache Lounge VS18 Win64) — start + HTTP 200 verified
 - Nginx 1.30.4 stable — start + HTTP verified
-- PHP 8.5.10 (default aktif) + PHP 8.4.25 (VS17 x64 Thread Safe) — php-cgi + FastCGI verified
-- MySQL Community 8.4.8 LTS (noinstall) — init + start + koneksi verified
-- MariaDB 11.4.8 — init + start + koneksi verified
-- PostgreSQL 18.6 — initdb + start + koneksi verified
-- Logo `resources/icons/icon.ico` dibuat internal (server-stack mark, navy/teal).
+- PHP 8.5.10 (default active) + PHP 8.4.25 (VS17 x64 Thread Safe) — php-cgi + FastCGI verified
+- MySQL Community 8.4.8 LTS (noinstall) — init + start + connection verified
+- MariaDB 11.4.8 — init + start + connection verified
+- PostgreSQL 18.6 — initdb + start + connection verified
+- Logo `resources/icons/icon.ico` created internally (server-stack mark, navy/teal).
 
-Catatan lingkungan:
+Environment notes:
 
-- PostgreSQL menolak jalan sebagai Administrator (aturan keamanan upstream). Di dev box yang elevated, verifikasi PG dilakukan via unprivileged token. User normal tidak elevated tidak kena masalah ini.
-- Port 20128 RESERVED — Al Server menolak memakai atau mematikan port ini (lihat RESERVED_PORTS di PortAllocator).
-- MySQL default 3306 bentrok jika mesin sudah ada service MariaDB/MySQL sistem; ganti port dari UI (terverifikasi di 3336).
+- PostgreSQL refuses to run as Administrator (upstream security rule). On an elevated dev box, PG verification is done via an unprivileged token. Normal, non-elevated users are not affected by this.
+- Port 20128 is RESERVED — Al Server refuses to use or kill this port (see RESERVED_PORTS in PortAllocator).
+- MySQL default 3306 conflicts if the machine already has a system MariaDB/MySQL service; change the port from the UI (verified on 3336).
 
-## Asumsi dan perlu direview (lama)
+## Assumptions and items to review (old)
 
-- Code signing: SKIP (installer unsigned). TODO sebelum rilis publik.
-- Final branding: logo internal sudah terpasang (icon.ico); ganti kapan saja via resources/icons/icon.ico lalu npm run dist ulang.
-- Nama aplikasi final: "Al Server" (App ID dev.al.server).
-- Tanpa binary asli, ServiceManager jalan mode mock (placeholder process) supaya dashboard tetap testable. Begitu binary asli ada, mock otomatis nonaktif.
-- Virtual host edit file hosts butuh elevated permission di Windows; app deteksi EACCES dan tampilkan instruksi run-as-admin.
-- Telemetry: tidak ada. electron-updater hanya cek GitHub Releases saat user klik Check.
+- Code signing: SKIP (unsigned installer). TODO before the public release.
+- Final branding: the internal logo is already installed (icon.ico); replace it any time via resources/icons/icon.ico, then run npm run dist again.
+- Final app name: "Al Server" (App ID dev.al.server).
+- Without the real binaries, ServiceManager runs in mock mode (placeholder process) so the dashboard stays testable. Once the real binaries are present, mock mode automatically turns off.
+- Virtual host editing of the hosts file needs elevated permission on Windows; the app detects EACCES and shows run-as-admin instructions.
+- Telemetry: none. electron-updater only checks GitHub Releases when the user clicks Check.
 
-## TODO rilis
+## Release TODO
 
-- [ ] Isi resources/icons/icon.ico final
-- [ ] Code signing Windows
-- [ ] Uji installer di Windows bersih + SmartScreen note
+- [ ] Fill in resources/icons/icon.ico (final)
+- [ ] Windows code signing
+- [ ] Test the installer on a clean Windows install + SmartScreen note
